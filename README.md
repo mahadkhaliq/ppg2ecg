@@ -12,6 +12,12 @@ Course Project: CMPSCI 8770 Introduction to Neural Networks, University of Misso
 
 ---
 
+## Dataset
+
+![Dataset Overview](report/dataset_overview.png)
+
+---
+
 ## Results
 
 | Model        | Params   | RMSE  | Pearson r | DTW   | R-peak F1 | RR err (ms) | HR-bucket acc |
