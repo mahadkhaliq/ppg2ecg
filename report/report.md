@@ -16,7 +16,7 @@ The difficulty is that ECG morphology encodes patient-specific electrical proper
 
 Sarkar and Etemad introduced CardioGAN [1], a GAN-based approach that produced visually sharper ECG reconstructions by adversarially penalising blurry outputs. Subsequent work has proposed Wasserstein objectives [9], patient-specific conditioning [10], and most recently diffusion-based synthesis [15,16]. These studies demonstrate that reconstruction is feasible, but they use different datasets, split strategies, and evaluation metrics, making direct comparison difficult.
 
-This study trains a 1D U-Net, a BiLSTM sequence-to-sequence model with scaled dot-product attention, and a patch-based Transformer encoder on the same BIDMC dataset [7,8] under identical conditions. We evaluate all three models using a three-tier protocol covering waveform fidelity, morphological preservation, and downstream heart-rate classification. The goal is a controlled comparison that exposes the practical tradeoffs between architectural families on a small-scale ECG reconstruction task.
+This study trains a 1D U-Net, a BiLSTM sequence-to-sequence model with scaled dot-product attention, and a patch-based Transformer encoder on the same BIDMC dataset [7,8] under identical conditions. We additionally evaluate a BiLSTM trained with an adversarial PatchGAN discriminator to test whether GAN-based regularisation scales down to the BIDMC training set size. All four models are evaluated using a three-tier protocol covering waveform fidelity, morphological preservation, and downstream heart-rate classification. The goal is a controlled comparison that exposes the practical tradeoffs between architectural families on a small-scale ECG reconstruction task.
 
 ---
 
@@ -90,7 +90,7 @@ Figure 1 shows the end-to-end pipeline, and Figure 2 details the three model arc
 
 ![Figure 2. Model architecture panel.](fig_2_.png)
 
-**Figure 2.** Architecture diagrams for the three model families: 1D U-Net with skip connections, BiLSTM seq2seq with scaled dot-product attention, and patch-based Transformer encoder-decoder.
+**Figure 2.** Architecture diagrams for the three model families. 1D U-Net: 4 encoder/decoder blocks with skip connections and a 512-channel bottleneck. BiLSTM: bidirectional encoder with hidden dimension 128, scaled dot-product attention, and a unidirectional LSTM decoder with hidden dimension 256. Transformer: patch embedding (20 patches of 25 samples) followed by 4 encoder layers; an ablation block (lower purple, "causal mask") corresponds to an encoder-decoder variant that was tested but discarded because learned decoder queries produced input-independent output.
 
 ---
 
@@ -110,18 +110,18 @@ Figure 1 shows the end-to-end pipeline, and Figure 2 details the three model arc
 | Model | RMSE | Pearson r | DTW | R-peak F1 | RR err (ms) | HR-bucket acc |
 |---|---|---|---|---|---|---|
 | 1D U-Net | 1.134 | 0.266 | 9.81 | **0.811** | 16 | 0.975 |
-| BiLSTM seq2seq | **1.050** | **0.334** | **7.37** | 0.807 | **8** | **0.980** |
+| BiLSTM seq2seq | **1.050** | **0.334** | **7.37** | 0.806 | **8** | **0.980** |
 | BiLSTM + GAN | 1.200 | 0.161 | 7.97 | 0.732 | 8 | 0.972 |
-| Transformer | 1.270 | 0.067 | 8.64 | 0.457 | 72 | 0.961 |
+| Transformer | 1.270 | 0.067 | 8.64 | 0.457 | 72 | 0.960 |
 | Real ECG (oracle) | 0 | 1.000 | 0 | 1.000 | 0 | 1.000 |
 
-BiLSTM achieves the lowest RMSE (1.050), highest Pearson r (0.334), lowest DTW (7.37), and the lowest RR-interval error (8 ms). U-Net is the closest competitor on morphology, reaching an R-peak F1 of 0.811 compared to BiLSTM's 0.807, but its higher RMSE and DTW indicate that the reconstruction is less accurate at the waveform level.
+BiLSTM achieves the lowest RMSE (1.050), highest Pearson r (0.334), lowest DTW (7.37), and the lowest RR-interval error (8 ms). U-Net is the closest competitor on morphology, reaching an R-peak F1 of 0.811 compared to BiLSTM's 0.806, but its higher RMSE and DTW indicate that the reconstruction is less accurate at the waveform level. Figure 3 illustrates these differences qualitatively on two test segments, and Figure 4 summarises the per-metric comparison across all four models.
 
-The BiLSTM with adversarial training performs worse than the plain BiLSTM on every metric: Pearson r drops from 0.334 to 0.122 and R-peak F1 from 0.807 to 0.719. The discriminator converged to near-perfect separation within five epochs, after which the adversarial gradient carried little information for the generator. On 3,184 training segments the discriminator overfits before the generator can learn from it, which is a known failure mode of GAN training at small dataset scale [13]. The gains reported by CardioGAN [1] likely require more training data or a less capable discriminator relative to the dataset size.
+The BiLSTM with adversarial training performs worse than the plain BiLSTM on every Tier 1 and Tier 2 metric: Pearson r drops from 0.334 to 0.161 and R-peak F1 from 0.806 to 0.732. The discriminator converged to near-perfect separation within five epochs, after which the adversarial gradient carried little information for the generator. On 3,184 training segments the discriminator overfits before the generator can learn from it, which is a known failure mode of GAN training at small dataset scale [13]. The gains reported by CardioGAN [1] likely require more training data or a less capable discriminator relative to the dataset size.
 
 The Transformer underperforms on all metrics. Its Pearson r of 0.067 is near zero and its RR-interval error of 72 ms is nine times larger than BiLSTM's. The encoder-only Transformer has 800 thousand parameters and 3,184 training segments. Self-attention lacks the local temporal inductive bias of convolutions and recurrent connections, making it more data-hungry. On the BIDMC scale the Transformer cannot learn the alignment between PPG systolic peaks and ECG QRS complexes reliably.
 
-The Pearson r values across all three models are low by the standards of signal processing benchmarks. This is not a training failure. ECG morphology is partly patient-specific: the exact QRS shape, T-wave polarity, and P-wave amplitude depend on cardiac anatomy that PPG does not encode. A model trained on the population distribution can recover the mean morphological pattern associated with a given PPG shape, but individual-level detail is lost. The predicted amplitude standard deviation (0.87) versus the true value (1.00) is consistent with this L1 regression-to-mean effect.
+The Pearson r values across all three regression-only models are low by the standards of signal processing benchmarks, with per-segment standard deviations comparable in magnitude to the means (BiLSTM r = 0.334 ± 0.330). This is not a training failure but a consequence of the task. ECG morphology is partly patient-specific: the exact QRS shape, T-wave polarity, and P-wave amplitude depend on cardiac anatomy that PPG does not encode. A model trained on the population distribution can recover the mean morphological pattern associated with a given PPG shape, but individual-level detail is lost. The predicted amplitude standard deviation (0.87) versus the true value (1.00) is consistent with this L1 regression-to-mean effect.
 
 The HR-bucket accuracy figures require a caveat. The test set contains 348 normal-rate segments, 5 tachycardia, and 1 bradycardia. A classifier that always predicts normal scores 98.3%, so the high accuracy values reflect class imbalance more than arrhythmia detection ability. R-peak F1 is the more diagnostic metric: BiLSTM and U-Net correctly locate about 81% of R-peaks within 50 ms, which is the property needed for any rhythm-based downstream application.
 
@@ -140,7 +140,7 @@ The HR-bucket accuracy figures require a caveat. The test set contains 348 norma
 | Lambda_freq | RMSE | Pearson r | DTW | R-peak F1 | HR-bucket acc |
 |---|---|---|---|---|---|
 | 0.0 (L1 only) | 1.021 | 0.131 | 18.72 | 0.013 | 0.953 |
-| 0.5 (default) | **1.050** | **0.334** | **7.37** | **0.807** | **0.980** |
+| 0.5 (default) | **1.050** | **0.334** | **7.37** | **0.806** | **0.980** |
 | 1.0 | 1.151 | 0.230 | 7.71 | 0.798 | 0.973 |
 
 ---
