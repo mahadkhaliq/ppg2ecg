@@ -1,5 +1,7 @@
 # PPG-to-ECG Reconstruction
 
+<img width="800" height="336" alt="ezgif-30604901485443b5" src="https://github.com/user-attachments/assets/f604c26a-496a-40db-bd4d-b6db3990387b" />
+
 Comparative study of deep learning architectures for reconstructing single-lead ECG (Lead II) from photoplethysmography (PPG) signals.  
 Course project — CMP_SCI 8770 Introduction to Neural Networks, University of Missouri.
 
@@ -129,7 +131,6 @@ Checkpoint: `app/checkpoints/mitbih_resnet1d.pt` (2.1 MB). Retrain in ~1 min: `p
 ---
 
 
-<img width="800" height="336" alt="ezgif-30604901485443b5" src="https://github.com/user-attachments/assets/f604c26a-496a-40db-bd4d-b6db3990387b" />
 
 ## Quickstart
 
