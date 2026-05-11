@@ -57,11 +57,12 @@ GAN discriminator collapsed early (d_loss curve visible in bottom-right panel) â
 
 ---
 
-<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/177bdbd8-f2d8-4358-8b54-a4a1bf9ed91e" />
 
 ## Model Architectures
 
-### 1D U-Net â€” 2,710,753 parameters
+
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/177bdbd8-f2d8-4358-8b54-a4a1bf9ed91e" />
+
 
 ---
 
@@ -75,6 +76,10 @@ GAN discriminator collapsed early (d_loss curve visible in bottom-right panel) â
 <img width="2320" height="836" alt="fig_2_" src="https://github.com/user-attachments/assets/24f0df83-74a4-4a73-b586-4d8c72af155c" />
 
 ---
+
+
+### 1D U-Net â€” 2,710,753 parameters
+
 
 ```
 Input (B, 1, 500)
