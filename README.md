@@ -63,6 +63,19 @@ GAN discriminator collapsed early (d_loss curve visible in bottom-right panel) �
 
 ### 1D U-Net — 2,710,753 parameters
 
+---
+
+
+<img width="1955" height="397" alt="fig_1_" src="https://github.com/user-attachments/assets/96c9d351-1488-46af-aafb-1b3ac0c4f90c" />
+
+
+---
+
+
+<img width="2320" height="836" alt="fig_2_" src="https://github.com/user-attachments/assets/24f0df83-74a4-4a73-b586-4d8c72af155c" />
+
+---
+
 ```
 Input (B, 1, 500)
   Encoder × 4  [Conv1d→BN→ReLU→Conv1d→BN→ReLU→MaxPool(2)]
@@ -136,19 +149,6 @@ Input (1, 250)  — ±1 s window around R-peak at 125 Hz
 
 **Val accuracy: 99.4%** — 30 epochs, AdamW lr=1e-3, cosine annealing, balanced class weights.  
 Checkpoint: `app/checkpoints/mitbih_resnet1d.pt` (2.1 MB). Retrain in ~1 min: `python app/train_mitbih.py`.
-
-
----
-
-
-<img width="1955" height="397" alt="fig_1_" src="https://github.com/user-attachments/assets/96c9d351-1488-46af-aafb-1b3ac0c4f90c" />
-
-
----
-
-
-<img width="2320" height="836" alt="fig_2_" src="https://github.com/user-attachments/assets/24f0df83-74a4-4a73-b586-4d8c72af155c" />
-
 
 
 ---
