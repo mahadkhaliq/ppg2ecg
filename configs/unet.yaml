@@ -1,0 +1,22 @@
+model:
+  name: unet
+  encoder_channels: [32, 64, 128, 256, 512]
+
+training:
+  batch_size: 64
+  epochs: 100
+  lr: 1.0e-4
+  weight_decay: 1.0e-5
+  patience: 10
+  loss_l1_weight: 1.0
+  loss_freq_weight: 0.5
+  grad_clip: 1.0
+  seed: 42
+
+data:
+  data_dir: data
+  num_workers: 4
+
+paths:
+  checkpoint_dir: checkpoints/unet
+  results_dir: results/unet

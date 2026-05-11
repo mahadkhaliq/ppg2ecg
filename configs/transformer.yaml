@@ -1,0 +1,28 @@
+model:
+  name: transformer
+  patch_size: 25
+  d_model: 128
+  num_heads: 4
+  num_encoder_layers: 4
+  num_decoder_layers: 4
+  ffn_dim: 512
+  dropout: 0.1
+
+training:
+  batch_size: 64
+  epochs: 100
+  lr: 1.0e-4
+  weight_decay: 1.0e-5
+  patience: 10
+  loss_l1_weight: 1.0
+  loss_freq_weight: 0.5
+  grad_clip: 1.0
+  seed: 42
+
+data:
+  data_dir: data
+  num_workers: 4
+
+paths:
+  checkpoint_dir: checkpoints/transformer
+  results_dir: results/transformer
