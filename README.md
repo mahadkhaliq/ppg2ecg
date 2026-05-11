@@ -16,6 +16,17 @@ Course Project: CMPSCI 8770 Introduction to Neural Networks, University of Misso
 
 ![Dataset Overview](report/dataset_overview.png)
 
+**BIDMC PPG and Respiration Dataset** (PhysioNet, ODC-By 1.0)  
+53 ICU subjects · ~8 min each · 125 Hz · signals: `PLETH` (PPG) and `II` (ECG Lead II)
+
+| Split | Subjects | Segments |
+|-------|----------|----------|
+| Train | 28       | 3,184    |
+| Val   | 5        | 452      |
+| Test  | 7        | 354      |
+
+~25% of subjects dropped after SQI filtering (noisy ICU PPG). Preprocessing: 4th-order Butterworth bandpass (PPG: 0.5–8 Hz, ECG: 0.5–40 Hz), 4-second windows with 50% overlap, per-window z-score normalisation.
+
 ---
 
 ## Results
@@ -134,21 +145,6 @@ Checkpoint: `app/checkpoints/mitbih_resnet1d.pt` (2.1 MB). Retrain in ~1 min: `p
 ---
 
 <img width="2085" height="1242" alt="image" src="https://github.com/user-attachments/assets/31a3ec26-fd98-41bb-8438-3743531902bb" />
-
----
-
-## Dataset
-
-**BIDMC PPG and Respiration Dataset** (PhysioNet, ODC-By 1.0)  
-53 ICU subjects · ~8 min each · 125 Hz · signals: `PLETH` (PPG) and `II` (ECG Lead II)
-
-| Split | Subjects | Segments |
-|-------|----------|----------|
-| Train | 28       | 3,184    |
-| Val   | 5        | 452      |
-| Test  | 7        | 354      |
-
-~25% of subjects dropped after SQI filtering (noisy ICU PPG). Preprocessing: 4th-order Butterworth bandpass (PPG: 0.5–8 Hz, ECG: 0.5–40 Hz), 4-second windows with 50% overlap, per-window z-score normalisation.
 
 ---
 
