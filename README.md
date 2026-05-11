@@ -7,6 +7,9 @@ Course project — CMP_SCI 8770 Introduction to Neural Networks, University of M
 
 ---
 
+<img width="800" height="336" alt="ezgif-39e84b7ef2fda190" src="https://github.com/user-attachments/assets/77b16c34-c7b7-4814-80fe-aea3241b013b" />
+
+
 ## Results
 
 | Model        | Params   | RMSE  | Pearson r | DTW   | R-peak F1 | RR err (ms) | HR-bucket acc |
