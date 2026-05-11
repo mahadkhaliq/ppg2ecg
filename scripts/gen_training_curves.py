@@ -4,23 +4,33 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT    = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
-OUT = ROOT / "report" / "training_curves.png"
+OUT     = ROOT / "report" / "training_curves.png"
 
 MODELS = {
     "unet":        ("U-Net",        "#4fc3f7"),
-    "bilstm":      ("BiLSTM",       "#a5d6a7"),
-    "transformer": ("Transformer",  "#ce93d8"),
-    "bilstm_gan":  ("BiLSTM+GAN",   "#ffb74d"),
+    "bilstm":      ("BiLSTM",       "#69f0ae"),
+    "transformer": ("Transformer",  "#ea80fc"),
+    "bilstm_gan":  ("BiLSTM+GAN",   "#ffab40"),
 }
 
-BG = "#0d0d0d"
-GRID = "#2a2a2a"
+BG      = "#0a0a0a"
+PANEL   = "#111111"
+GRID    = "#1e1e1e"
+TICK    = "#666666"
+LABEL   = "#aaaaaa"
+WHITE   = "#e8e8e8"
 
-fig, axes = plt.subplots(2, 2, figsize=(12, 7))
+plt.rcParams.update({
+    "font.family":  "DejaVu Sans",
+    "axes.unicode_minus": False,
+})
+
+fig, axes = plt.subplots(2, 2, figsize=(13, 7.5))
 fig.patch.set_facecolor(BG)
 axes = axes.flatten()
 
@@ -36,54 +46,62 @@ for ax, (key, (name, color)) in zip(axes, MODELS.items()):
     history    = data["history"]
     epochs     = [h["epoch"] for h in history]
     val_loss   = [h["val_loss"] for h in history]
-
-    # GAN uses g_loss as train loss
     train_loss = [h.get("train_loss") or h.get("g_loss") for h in history]
 
-    ax.set_facecolor(BG)
+    # Panel styling
+    ax.set_facecolor(PANEL)
     for spine in ax.spines.values():
-        spine.set_edgecolor(GRID)
-    ax.tick_params(colors="#aaaaaa", labelsize=9)
-    ax.grid(True, color=GRID, linewidth=0.5)
-    ax.xaxis.label.set_color("#aaaaaa")
-    ax.yaxis.label.set_color("#aaaaaa")
-    ax.title.set_color("#eeeeee")
+        spine.set_edgecolor("#2a2a2a")
+        spine.set_linewidth(0.8)
+    ax.tick_params(colors=TICK, labelsize=8.5, length=3, width=0.6)
+    ax.grid(True, color=GRID, linewidth=0.6, linestyle="-")
+    ax.set_axisbelow(True)
 
-    ax.plot(epochs, train_loss, color=color,     linewidth=1.8, label="Train loss")
-    ax.plot(epochs, val_loss,   color="white",   linewidth=1.4, linestyle="--", alpha=0.75, label="Val loss")
+    # Loss curves
+    ax.plot(epochs, train_loss, color=color,  linewidth=2.0, label="Train", alpha=0.9)
+    ax.plot(epochs, val_loss,   color=WHITE,  linewidth=1.5, linestyle="--", alpha=0.6, label="Val")
 
-    # Mark best val epoch
+    # Best val marker
     best_idx = int(np.argmin(val_loss))
-    ax.scatter(epochs[best_idx], val_loss[best_idx], color=color, s=60, zorder=5)
-    ax.annotate(f"  best={val_loss[best_idx]:.4f}",
-                xy=(epochs[best_idx], val_loss[best_idx]),
-                color=color, fontsize=8)
+    bx, by   = epochs[best_idx], val_loss[best_idx]
+    ax.scatter(bx, by, color=color, s=70, zorder=6, edgecolors=WHITE, linewidths=0.7)
+    # annotation offset: go left if close to right edge
+    xoff = 0.5 if bx < epochs[-1] * 0.75 else -0.5
+    ha   = "left" if xoff > 0 else "right"
+    ax.annotate(f"best {by:.4f}",
+                xy=(bx, by), xytext=(bx + xoff, by),
+                color=color, fontsize=7.5, ha=ha, va="center",
+                arrowprops=dict(arrowstyle="-", color=color, lw=0.6))
 
-    # GAN: discriminator loss on secondary y-axis
-    d_loss_vals = [h.get("d_loss") for h in history]
-    if any(v is not None for v in d_loss_vals):
-        history_has_d = True
-        d_loss_vals = [v for v in d_loss_vals if v is not None]
-    else:
-        history_has_d = False
-
-    if history_has_d:
+    # GAN discriminator secondary axis
+    d_vals = [h.get("d_loss") for h in history]
+    if any(v is not None for v in d_vals):
+        d_vals = [v for v in d_vals if v is not None]
         ax2 = ax.twinx()
-        ax2.set_facecolor(BG)
-        ax2.tick_params(colors="#ff7070", labelsize=8)
-        ax2.spines["right"].set_edgecolor("#ff7070")
-        ax2.plot(epochs[:len(d_loss_vals)], d_loss_vals, color="#ff5252", linewidth=1.0,
-                 linestyle=":", alpha=0.7, label="Discriminator loss")
-        ax2.set_ylabel("D loss", color="#ff7070", fontsize=8)
-        ax2.yaxis.label.set_color("#ff7070")
-        ax2.tick_params(axis="y", colors="#ff5252")
+        ax2.set_facecolor(PANEL)
+        ax2.spines["right"].set_edgecolor("#ff5252")
+        ax2.spines["right"].set_linewidth(0.8)
+        for s in ["top","left","bottom"]:
+            ax2.spines[s].set_visible(False)
+        ax2.tick_params(axis="y", colors="#ff7070", labelsize=7.5, length=3, width=0.6)
+        ax2.plot(epochs[:len(d_vals)], d_vals, color="#ff5252",
+                 linewidth=1.0, linestyle=":", alpha=0.65, label="Discriminator")
+        ax2.set_ylabel("Discriminator loss", color="#ff7070", fontsize=7.5, labelpad=6)
 
-    ax.set_title(name, fontsize=12, fontweight="bold")
-    ax.set_xlabel("Epoch", fontsize=9)
-    ax.set_ylabel("Loss", fontsize=9)
-    ax.legend(fontsize=8, facecolor="#1a1a1a", edgecolor=GRID, labelcolor="#cccccc")
+    # Axis labels & title
+    ax.set_title(name, color=WHITE, fontsize=12, fontweight="bold", pad=8)
+    ax.set_xlabel("Epoch", color=LABEL, fontsize=8.5, labelpad=4)
+    ax.set_ylabel("Loss", color=LABEL, fontsize=8.5, labelpad=4)
+    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter("%.2f"))
 
-fig.suptitle("Training & Validation Loss", color="#eeeeee", fontsize=14, fontweight="bold", y=1.01)
-plt.tight_layout()
-plt.savefig(OUT, dpi=150, bbox_inches="tight", facecolor=BG)
+    # Legend
+    leg = ax.legend(fontsize=8, facecolor="#1a1a1a", edgecolor="#2a2a2a",
+                    labelcolor=LABEL, loc="upper right",
+                    framealpha=0.85, borderpad=0.6, handlelength=1.6)
+
+fig.suptitle("Training & Validation Loss — PPG-to-ECG Models",
+             color=WHITE, fontsize=13, fontweight="bold", y=1.01)
+
+plt.tight_layout(pad=1.5, h_pad=2.2, w_pad=1.8)
+plt.savefig(OUT, dpi=160, bbox_inches="tight", facecolor=BG)
 print(f"Saved: {OUT}")

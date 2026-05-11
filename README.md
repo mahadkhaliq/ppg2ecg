@@ -1,6 +1,6 @@
 # PPG-to-ECG Reconstruction
 
-<img width="800" height="336" alt="ezgif-30604901485443b5" src="https://github.com/user-attachments/assets/f604c26a-496a-40db-bd4d-b6db3990387b" />
+<img width="800" height="336" alt="ezgif-30604901485443b5" src="https://github.com/user-attachments/assets/f604c26a-496a40db-bd4d-b6db3990387b" />
 
 Comparative study of deep learning architectures for reconstructing single-lead ECG (Lead II) from photoplethysmography (PPG) signals.  
 Course Project: CMPSCI 8770 Introduction to Neural Networks, University of Missouri.
@@ -9,6 +9,7 @@ Course Project: CMPSCI 8770 Introduction to Neural Networks, University of Misso
 
 <img width="800" height="336" alt="ezgif-39e84b7ef2fda190" src="https://github.com/user-attachments/assets/77b16c34-c7b7-4814-80fe-aea3241b013b" />
 
+---
 
 ## Results
 
@@ -25,7 +26,7 @@ Course Project: CMPSCI 8770 Introduction to Neural Networks, University of Misso
 
 ## Training Curves
 
-![Training and Validation Loss](report/trainingcurves.png)
+![Training and Validation Loss](report/training_curves.png)
 
 | Model       | Best Val Loss | Stopped Epoch | Early Stop Patience |
 |-------------|---------------|---------------|---------------------|
@@ -34,16 +35,15 @@ Course Project: CMPSCI 8770 Introduction to Neural Networks, University of Misso
 | BiLSTM+GAN  | 1.5808        | 5 / 15        | 10                  |
 | Transformer | 1.6141        | 16 / 26       | 10                  |
 
-GAN discriminator collapsed early (dloss curve visible in bottom-right panel)  dataset too small (3,184 segments) for stable adversarial training.
+GAN discriminator collapsed early (d_loss curve visible in bottom-right panel) — dataset too small (3,184 segments) for stable adversarial training.
 
 ---
-
 
 <img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/177bdbd8-f2d8-4358-8b54-a4a1bf9ed91e" />
 
 ## Model Architectures
 
-### 1D U-Net  2,710,753 parameters
+### 1D U-Net — 2,710,753 parameters
 
 ```
 Input (B, 1, 500)
@@ -60,24 +60,24 @@ Encoder captures multi-scale PPG features; skip connections preserve temporal al
 
 ---
 
-### BiLSTM Seq2Seq  892,161 parameters
+### BiLSTM Seq2Seq — 892,161 parameters
 
 ```
 Input (B, 1, 500) → squeeze → (B, 500)
   Feature projection  Linear(1→32)
   Encoder BiLSTM      2 layers, hidden=128, bidirectional
-    encoderout: (B, 500, 256)
+    encoder_out: (B, 500, 256)
   Decoder LSTM        2 layers, hidden=256
-    + Scaled dot-product attention over encoderout
+    + Scaled dot-product attention over encoder_out
   Output projection   Linear(256→1)
 Output (B, 1, 500)
 ```
 
-Note: Bahdanau attention replaced with scaled dot-product (OOM on B=64, T=500 with 8 GB VRAM). Best overall model  lowest RMSE and highest Pearson r.
+Note: Bahdanau attention replaced with scaled dot-product (OOM on B=64, T=500 with 8 GB VRAM). Best overall model — lowest RMSE and highest Pearson r.
 
 ---
 
-### Transformer Encoder-Decoder  ~800,000 parameters
+### Transformer Encoder-Decoder — ~800,000 parameters
 
 ```
 Input (B, 1, 500)
@@ -89,23 +89,23 @@ Input (B, 1, 500)
 Output (B, 1, 500)
 ```
 
-Weakest on morphology (R-peak F1=0.457) and RR error (72 ms). Data-efficiency problem  Transformers need larger datasets than BIDMC's 3,184 training segments.
+Weakest on morphology (R-peak F1=0.457) and RR error (72 ms). Data-efficiency problem — Transformers need larger datasets than BIDMC's 3,184 training segments.
 
 ---
 
-### BiLSTM + GAN  892 K (G) + 42 K (D) parameters
+### BiLSTM + GAN — 892 K (G) + 42 K (D) parameters
 
-Generator identical to BiLSTM above. Discriminator: 4× `Conv1d+LeakyReLU` with spectral normalisation → `AdaptiveAvgPool → Linear(128,1)`. Discriminator collapsed despite spectral normalisation  honest negative result.
+Generator identical to BiLSTM above. Discriminator: 4× `Conv1d+LeakyReLU` with spectral normalisation → `AdaptiveAvgPool → Linear(128,1)`. Discriminator collapsed despite spectral normalisation — honest negative result.
 
 ---
 
-## Beat Classifier (MIT-BIH ResNet1D)  530,273 parameters
+## Beat Classifier (MIT-BIH ResNet1D) — 530,273 parameters
 
 Trained on MIT-BIH Arrhythmia Database (48 records, 109,375 beats).  
 AAMI 5-class: **N** Normal · **S** Supraventricular ectopic · **V** Ventricular ectopic · **F** Fusion · **Q** Unknown/paced
 
 ```
-Input (1, 250)   ±1 s window around R-peak at 125 Hz
+Input (1, 250)  — ±1 s window around R-peak at 125 Hz
   Stem   Conv1d(1,32,k=15,s=2) → BN → ReLU
   Block1 ResBlock(32,32)
   Block2 ResBlock(32,64,  stride=2)
@@ -116,8 +116,8 @@ Input (1, 250)   ±1 s window around R-peak at 125 Hz
   Head   Linear(128,5)
 ```
 
-**Val accuracy: 99.4%**  30 epochs, AdamW lr=1e-3, cosine annealing, balanced class weights.  
-Checkpoint: `app/checkpoints/mitbihresnet1d.pt` (2.1 MB). Retrain in ~1 min: `python app/trainmitbih.py`.
+**Val accuracy: 99.4%** — 30 epochs, AdamW lr=1e-3, cosine annealing, balanced class weights.  
+Checkpoint: `app/checkpoints/mitbih_resnet1d.pt` (2.1 MB). Retrain in ~1 min: `python app/train_mitbih.py`.
 
 ---
 
@@ -136,8 +136,6 @@ Checkpoint: `app/checkpoints/mitbihresnet1d.pt` (2.1 MB). Retrain in ~1 min: `py
 
 ---
 
-
-
 ## Quickstart
 
 ```bash
@@ -147,7 +145,7 @@ conda activate ppg2ecg
 pip install -r requirements.txt
 
 # 2. Download data
-bash scripts/downloadbidmc.sh
+bash scripts/download_bidmc.sh
 
 # 3. Preprocess
 python src/data/preprocess.py
@@ -164,7 +162,7 @@ conda activate ppg2ecg && streamlit run app/app.py
 
 ### Train beat classifier (one-time)
 ```bash
-python app/trainmitbih.py
+python app/train_mitbih.py
 ```
 
 ---
@@ -175,14 +173,14 @@ python app/trainmitbih.py
 L = L1(ŷ, y) + 0.5 × L1(|STFT(ŷ)|, |STFT(y)|)
 ```
 
-STFT: nfft=128, hop=32, Hann window. Encourages both time-domain accuracy and spectral fidelity.
+STFT: n_fft=128, hop=32, Hann window. Encourages both time-domain accuracy and spectral fidelity.
 
 ---
 
 ## Training Protocol
 
-- Optimiser: AdamW (lr=1e-4, weightdecay=1e-5)
-- Schedule: cosine annealing, Tmax=100
+- Optimiser: AdamW (lr=1e-4, weight_decay=1e-5)
+- Schedule: cosine annealing, T_max=100
 - Gradient clipping: 1.0
 - Early stopping: patience=10 on val loss
 - Batch size: 64 · Seed: 42
@@ -209,18 +207,18 @@ ppg2ecg/
 │   ├── app.py                  # Streamlit demo (hospital monitor UI)
 │   ├── inference.py            # Sliding-window BiLSTM PPG→ECG
 │   ├── classifier.py           # Rhythm classification (ResNet1D + rules)
-│   ├── trainmitbih.py         # One-time MIT-BIH beat classifier training
+│   ├── train_mitbih.py         # One-time MIT-BIH beat classifier training
 │   └── checkpoints/
-│       └── mitbihresnet1d.pt  # Beat classifier (530K params, 99.4% acc)
+│       └── mitbih_resnet1d.pt  # Beat classifier (530K params, 99.4% acc)
 ├── scripts/
-│   ├── downloadbidmc.sh
-│   ├── slurmtrain.sh
-│   └── gentrainingcurves.py
+│   ├── download_bidmc.sh
+│   ├── slurm_train.sh
+│   └── gen_training_curves.py
 ├── configs/
 │   ├── unet.yaml · bilstm.yaml · transformer.yaml
 ├── report/
 │   ├── report.md
-│   └── trainingcurves.png
+│   └── training_curves.png
 └── checkpoints/
     └── bilstm/best.pt          # Best PPG→ECG model (892K params)
 ```
