@@ -1,6 +1,7 @@
 # PPG-to-ECG Reconstruction
 
-<img width="800" height="336" alt="ezgif-30604901485443b5" src="https://github.com/user-attachments/assets/f604c26a-496a40db-bd4d-b6db3990387b" />
+<img width="800" height="336" alt="ezgif-30604901485443b5" src="https://github.com/user-attachments/assets/9864aeb4-b133-4e99-b6b0-67e8438e6f78" />
+
 
 Comparative study of deep learning architectures for reconstructing single-lead ECG (Lead II) from photoplethysmography (PPG) signals.  
 Course Project: CMPSCI 8770 Introduction to Neural Networks, University of Missouri.
