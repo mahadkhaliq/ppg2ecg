@@ -38,6 +38,9 @@ GAN discriminator collapsed early (dloss curve visible in bottom-right panel)  d
 
 ---
 
+
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/177bdbd8-f2d8-4358-8b54-a4a1bf9ed91e" />
+
 ## Model Architectures
 
 ### 1D U-Net  2,710,753 parameters
