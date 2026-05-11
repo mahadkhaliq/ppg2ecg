@@ -41,11 +41,6 @@ See `CLAUDE.md` for the full layout and conventions. Key entry points:
 # On local: push changes
 git add -A && git commit -m "..." && git push
 
-# On Hellbender:
-ssh mkfqm@hellbender-login.rnet.missouri.edu
-cd ~/ppg2ecg && git pull
-sbatch scripts/slurm_train.sh
-
 # Pull results back:
 scp -r mkfqm@hellbender-login:~/ppg2ecg/results .
 ```
