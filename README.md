@@ -2,6 +2,9 @@
 
 Comparative study of 1D U-Net, BiLSTM, and Transformer architectures for reconstructing ECG signals from PPG. Course project for CMP_SCI 8770 (Intro to Neural Networks), Spring 2026.
 
+
+<img width="3125" height="1315" alt="Screenshot from 2026-05-10 23-22-44" src="https://github.com/user-attachments/assets/f85cf8ac-e53a-42be-8f3f-689b306a2d4d" />
+
 ## Quickstart
 
 ```bash
