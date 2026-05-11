@@ -120,7 +120,12 @@ Input (1, 250)  — ±1 s window around R-peak at 125 Hz
 **Val accuracy: 99.4%** — 30 epochs, AdamW lr=1e-3, cosine annealing, balanced class weights.  
 Checkpoint: `app/checkpoints/mitbih_resnet1d.pt` (2.1 MB). Retrain in ~1 min: `python app/train_mitbih.py`.
 
+
 ---
+
+<img width="2234" height="819" alt="image" src="https://github.com/user-attachments/assets/f7259a9b-a8f5-4c68-afab-5162a4fe9bac" />
+
+
 
 ## Dataset
 
