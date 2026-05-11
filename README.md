@@ -57,81 +57,27 @@ GAN discriminator collapsed early (d_loss curve visible in bottom-right panel) �
 
 ---
 
-
-## Model Architectures
-
-
-<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/177bdbd8-f2d8-4358-8b54-a4a1bf9ed91e" />
-
-
----
-
+## Pipeline
 
 <img width="1955" height="397" alt="fig_1_" src="https://github.com/user-attachments/assets/96c9d351-1488-46af-aafb-1b3ac0c4f90c" />
 
-
 ---
 
+## Model Architectures
 
 <img width="2320" height="836" alt="fig_2_" src="https://github.com/user-attachments/assets/24f0df83-74a4-4a73-b586-4d8c72af155c" />
 
----
+| Model | Params | Key design |
+|-------|--------|------------|
+| U-Net | 2,711 K | 4× encoder/decoder blocks, skip connections, 512ch bottleneck |
+| BiLSTM | 892 K | BiLSTM encoder + scaled dot-product attention + LSTM decoder |
+| Transformer | ~800 K | 20-patch embed, 4-layer encoder-decoder, causal mask |
+| BiLSTM+GAN | 892+42 K | BiLSTM generator + spectral-norm discriminator |
 
-
-### 1D U-Net — 2,710,753 parameters
-
-
-```
-Input (B, 1, 500)
-  Encoder × 4  [Conv1d→BN→ReLU→Conv1d→BN→ReLU→MaxPool(2)]
-    Channels: 1→32→64→128→256
-  Bottleneck   [2× Conv1d blocks, 512 channels]
-  Decoder × 4  [ConvTranspose1d + skip concat → Conv1d→BN→ReLU×2]
-    Channels: 512→256→128→64→32
-  Head         [Conv1d(32,1,k=1)]
-Output (B, 1, 500)
-```
-
-Encoder captures multi-scale PPG features; skip connections preserve temporal alignment. Best R-peak F1 (0.811).
-
----
-
-### BiLSTM Seq2Seq — 892,161 parameters
-
-```
-Input (B, 1, 500) → squeeze → (B, 500)
-  Feature projection  Linear(1→32)
-  Encoder BiLSTM      2 layers, hidden=128, bidirectional
-    encoder_out: (B, 500, 256)
-  Decoder LSTM        2 layers, hidden=256
-    + Scaled dot-product attention over encoder_out
-  Output projection   Linear(256→1)
-Output (B, 1, 500)
-```
-
-Note: Bahdanau attention replaced with scaled dot-product (OOM on B=64, T=500 with 8 GB VRAM). Best overall model — lowest RMSE and highest Pearson r.
-
----
-
-### Transformer Encoder-Decoder — ~800,000 parameters
-
-```
-Input (B, 1, 500)
-  Patch embed    500→20 patches of 25 samples, Linear(25→128)
-  + Sinusoidal PE  (B, 20, 128)
-  Encoder        4 layers, 4 heads, FFN dim=512
-  Decoder        4 layers, 4 heads, FFN dim=512, causal mask
-  Head           Linear(128→25), reshape (B,1,500)
-Output (B, 1, 500)
-```
-
-Weakest on morphology (R-peak F1=0.457) and RR error (72 ms). Data-efficiency problem — Transformers need larger datasets than BIDMC's 3,184 training segments.
-
----
-
-### BiLSTM + GAN — 892 K (G) + 42 K (D) parameters
-
-Generator identical to BiLSTM above. Discriminator: 4× `Conv1d+LeakyReLU` with spectral normalisation → `AdaptiveAvgPool → Linear(128,1)`. Discriminator collapsed despite spectral normalisation — honest negative result.
+**U-Net** encoder captures multi-scale PPG features; skip connections preserve temporal alignment (best R-peak F1: 0.811).  
+**BiLSTM** uses scaled dot-product attention (Bahdanau OOMed at B=64, T=500 on 8 GB VRAM); best overall model.  
+**Transformer** weakest on morphology (R-peak F1=0.457) — data-efficiency problem with only 3,184 training segments.  
+**BiLSTM+GAN** discriminator collapsed despite spectral normalisation — honest negative result.
 
 ---
 

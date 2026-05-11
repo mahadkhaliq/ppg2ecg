@@ -82,9 +82,15 @@ The STFT uses n_fft=128, hop_length=32, and a Hann window. The frequency term pe
 
 **Evaluation tiers.** Tier 1 measures waveform fidelity: RMSE, Pearson correlation, and DTW distance computed on a 200-segment subsample of the test set. Tier 2 measures morphological preservation: R-peaks are detected on both real and reconstructed ECG using the Pan-Tompkins algorithm via NeuroKit2 [20], and R-peak F1 is computed with a 50 ms matching tolerance alongside median absolute RR-interval error. Tier 3 measures downstream utility: each test segment is classified into bradycardia (HR below 60 bpm), normal (60 to 100 bpm), or tachycardia (above 100 bpm) from R-peak positions, and HR-bucket agreement between real and reconstructed ECG is reported.
 
-![Figure 1. PPG-to-ECG reconstruction pipeline.](figure1_pipeline.png)
+Figure 1 shows the end-to-end pipeline, and Figure 2 details the three model architectures.
+
+![Figure 1. PPG-to-ECG reconstruction pipeline.](fig_1_.png)
 
 **Figure 1.** PPG-to-ECG reconstruction pipeline from raw BIDMC CSV files through preprocessing to three architectural families and three-tier evaluation.
+
+![Figure 2. Model architecture panel.](fig_2_.png)
+
+**Figure 2.** Architecture diagrams for the three model families: 1D U-Net with skip connections, BiLSTM seq2seq with scaled dot-product attention, and patch-based Transformer encoder-decoder.
 
 ---
 
@@ -119,13 +125,13 @@ The Pearson r values across all three models are low by the standards of signal 
 
 The HR-bucket accuracy figures require a caveat. The test set contains 348 normal-rate segments, 5 tachycardia, and 1 bradycardia. A classifier that always predicts normal scores 98.3%, so the high accuracy values reflect class imbalance more than arrhythmia detection ability. R-peak F1 is the more diagnostic metric: BiLSTM and U-Net correctly locate about 81% of R-peaks within 50 ms, which is the property needed for any rhythm-based downstream application.
 
-![Figure 2. Qualitative reconstructions.](figure2_qualitative.png)
+![Figure 3. Qualitative reconstructions.](figure2_qualitative.png)
 
-**Figure 2.** Qualitative reconstruction examples for two test segments. Segment A (Pearson r = 0.77) shows all three models tracking QRS timing correctly, with BiLSTM recovering T-wave amplitude most faithfully. Segment B (r = 0.30) comes from a noisier PPG recording; BiLSTM and U-Net maintain plausible QRS morphology while the Transformer output is flatter.
+**Figure 3.** Qualitative reconstruction examples for two test segments. Segment A (Pearson r = 0.77) shows all three models tracking QRS timing correctly, with BiLSTM recovering T-wave amplitude most faithfully. Segment B (r = 0.30) comes from a noisier PPG recording; BiLSTM and U-Net maintain plausible QRS morphology while the Transformer output is flatter.
 
-![Figure 3. Per-metric comparison.](figure3_metrics.png)
+![Figure 4. Per-metric comparison.](figure3_metrics.png)
 
-**Figure 3.** Per-metric comparison across all four models. Bold outlines mark the best value per metric.
+**Figure 4.** Per-metric comparison across all four models. Bold outlines mark the best value per metric.
 
 **Loss ablation.** Table 4 reports the effect of varying the frequency-domain loss weight on BiLSTM. At weight zero (pure L1), R-peak F1 collapses to 0.013: the model outputs the conditional mean of the training ECG distribution, which minimises point-wise L1 but contains no beat structure. RMSE is slightly lower than the default precisely because regression to the mean reduces average error at the cost of all morphological content. Weight 1.0 recovers F1 to 0.798 but raises RMSE. Weight 0.5 achieves the best balance. The spectral term is necessary; without it the model produces a structurally flat output regardless of the PPG input.
 
@@ -189,9 +195,9 @@ BIDMC is limited to 53 subjects from a single ICU population, and only lead II E
 
 [19] Y. Nie, N. H. Nguyen, P. Sinthong, and J. Kalagnanam, "A Time Series is Worth 64 Words: Long-Term Forecasting with Transformers," in *Int. Conf. Learn. Represent.*, 2023.
 
-[21] X. Mao, Q. Li, H. Xie, R. Y. K. Lau, Z. Wang, and S. P. Smolley, "Least Squares Generative Adversarial Networks," in *Proc. IEEE Int. Conf. Comput. Vis. (ICCV)*, 2017, pp. 2794-2802.
-
 [20] D. Makowski, T. Pham, Z. J. Lau, J. C. Brammer, F. Legia, H. Velastegui-Hernandez, R. Dominiak, S. Langer, N. Bhatt, B. Lenhart, A. Misiak, and M. Garg, "NeuroKit2: A Python Toolbox for Neurophysiological Signal Processing," *Behav. Res. Methods*, vol. 53, pp. 1689-1696, 2021.
+
+[21] X. Mao, Q. Li, H. Xie, R. Y. K. Lau, Z. Wang, and S. P. Smolley, "Least Squares Generative Adversarial Networks," in *Proc. IEEE Int. Conf. Comput. Vis. (ICCV)*, 2017, pp. 2794-2802.
 
 ---
 
