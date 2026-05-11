@@ -140,6 +140,20 @@ Checkpoint: `app/checkpoints/mitbih_resnet1d.pt` (2.1 MB). Retrain in ~1 min: `p
 
 ---
 
+
+<img width="1955" height="397" alt="fig_1_" src="https://github.com/user-attachments/assets/96c9d351-1488-46af-aafb-1b3ac0c4f90c" />
+
+
+---
+
+
+<img width="2320" height="836" alt="fig_2_" src="https://github.com/user-attachments/assets/24f0df83-74a4-4a73-b586-4d8c72af155c" />
+
+
+
+---
+
+
 <img width="2234" height="819" alt="image" src="https://github.com/user-attachments/assets/f7259a9b-a8f5-4c68-afab-5162a4fe9bac" />
 
 ---
