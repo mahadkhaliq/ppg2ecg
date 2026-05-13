@@ -218,6 +218,18 @@ The HR-bucket accuracy figures require a caveat. The test set contains 348 norma
   \end{tabular}
 \end{table}
 
+% ---- Application ------------------------------------------------------------
+\section{Application}
+
+The trained BiLSTM is deployed in an interactive application (Figure~\ref{fig:ui}) demonstrating end-to-end use: PPG upload, sliding-window reconstruction, real-time R-peak detection, and AAMI five-class beat classification using a ResNet1D trained separately on MIT-BIH (99.4\% validation accuracy).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{UI_ss.png}
+  \caption{Interactive application interface (hospital-monitor style). The vitals bar reports instantaneous heart rate, rhythm label with confidence, RMSSD heart-rate variability, and beat count. The main panel shows a 60\,fps canvas-rendered ECG sweep with colour-coded beat markers (green: N, orange: S, red: V, purple: F, grey: Q). Beat classifier output is displayed below the trace; the screenshot captures a tachycardia segment (HR\,=\,126\,bpm) with all 126 beats classified as Normal.}
+  \label{fig:ui}
+\end{figure}
+
 % ---- Conclusions ------------------------------------------------------------
 \section{Conclusions}
 

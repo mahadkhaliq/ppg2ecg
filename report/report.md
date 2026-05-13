@@ -145,6 +145,16 @@ The HR-bucket accuracy figures require a caveat. The test set contains 348 norma
 
 ---
 
+## Application
+
+The trained BiLSTM is deployed in an interactive application (Figure 5) demonstrating end-to-end use: PPG upload, sliding-window reconstruction, real-time R-peak detection, and AAMI five-class beat classification using a ResNet1D trained separately on MIT-BIH (99.4% validation accuracy).
+
+![Figure 5. Application interface.](UI_ss.png)
+
+**Figure 5.** Interactive application interface (hospital-monitor style). The vitals bar reports instantaneous heart rate, rhythm label with confidence, RMSSD heart-rate variability, and beat count. The main panel shows a 60 fps canvas-rendered ECG sweep with colour-coded beat markers (green: N, orange: S, red: V, purple: F, grey: Q). Beat classifier output is displayed below the trace; the screenshot captures a tachycardia segment (HR = 126 bpm) with all 126 beats classified as Normal.
+
+---
+
 ## Conclusions
 
 BiLSTM with scaled dot-product attention is the best-performing model in this comparison, achieving the lowest RMSE, highest Pearson r, shortest DTW, and smallest RR-interval error. The 1D U-Net is competitive on R-peak detection but lags on waveform-level metrics. The Transformer performs worst on every metric, which we attribute to insufficient training data rather than architectural unsuitability: self-attention provides no local temporal prior and requires more examples to learn the PPG-to-ECG alignment.
