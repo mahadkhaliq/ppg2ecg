@@ -36,27 +36,25 @@ This study trains a 1D U-Net, a BiLSTM sequence-to-sequence model with scaled do
 
 ## Data
 
-We use the BIDMC PPG and Respiration Dataset [7,8], which contains simultaneous PPG and ECG recordings from 53 ICU patients sampled at 125 Hz. Each recording is approximately eight minutes long. We use the PPG channel (column PLETH) and ECG lead II (column II) from the per-subject CSV files.
+This study uses two datasets. The BIDMC PPG and Respiration Dataset [7,8] supplies paired PPG and ECG recordings for the reconstruction comparison. The MIT-BIH Arrhythmia Database [22] supplies cardiologist-annotated beats for the downstream beat classifier used in the application (Section 6). Both are open-access waveform corpora hosted by PhysioNet. Properties of each are summarised in Table 1.
 
-Subjects are split at the subject level to prevent patient leakage: subjects 1 to 38 for training, 39 to 45 for validation, and 46 to 53 for testing. Not all subjects produced usable segments after quality filtering; the final counts are shown in Table 1.
+**BIDMC.** Contains simultaneous PPG and ECG recordings from 53 ICU patients at Beth Israel Deaconess Medical Center, sampled at 125 Hz, each approximately eight minutes long. The signals were acquired by bedside monitors during routine clinical care and exported as per-subject CSV files. We use the PPG channel (column `PLETH`) and ECG lead II (column `II`). Subjects are split at the subject level to prevent patient leakage: subjects 1–38 for training, 39–45 for validation, 46–53 for testing. Preprocessing applies a fourth-order zero-phase Butterworth bandpass filter (PPG: 0.5–8 Hz; ECG: 0.5–40 Hz), segments the filtered signals into four-second windows of 500 samples with 50% stride, computes a template-matching Signal Quality Index (SQI) per window by measuring Pearson correlation between the two halves of the window, and discards windows below SQI 0.5. Each surviving window is z-score normalised independently for PPG and ECG. The subject counts after filtering (28/5/7) are lower than the assignment (38/7/8) because roughly 25% of subjects were dropped due to corrupted or flat PPG traces, consistent with the ICU population in BIDMC, where motion artefact and poor perfusion frequently degrade PPG quality.
 
-Preprocessing applies a fourth-order zero-phase Butterworth bandpass filter (PPG: 0.5 to 8 Hz; ECG: 0.5 to 40 Hz), segments the filtered signals into four-second windows of 500 samples with 50% stride, computes a template-matching Signal Quality Index (SQI) per window by measuring Pearson correlation between the two halves of the window, and discards windows below SQI 0.5. Each surviving window is z-score normalised independently for PPG and ECG.
+**MIT-BIH.** The Arrhythmia Database [22] contains 48 half-hour two-channel ambulatory ECG recordings sampled at 360 Hz from 47 subjects studied at Boston's Beth Israel Hospital between 1975 and 1979. Annotations identify approximately 110,000 beats across 16 rhythm classes, which we map to the AAMI EC57 five-class scheme: Normal (N), Supraventricular ectopic (S), Ventricular ectopic (V), Fusion (F), and Unknown/paced (Q). We use lead MLII (channel 0), apply the same 0.5–40 Hz Butterworth bandpass as for BIDMC ECG, resample from 360 Hz to 125 Hz to match the BIDMC sampling rate, and extract two-second windows of 250 samples centred on each annotated R-peak. After per-window z-score normalisation the resulting set contains 109,375 labelled beats, split 90/10 for training and validation. MIT-BIH is not used in the PPG-to-ECG reconstruction comparison; it serves only the beat classifier.
 
-**Table 1.** Dataset summary after quality filtering.
+**Table 1.** Summary of the two datasets used in this work.
 
-| Property | Value |
-|---|---|
-| Source | PhysioNet BIDMC v1.0.0 |
-| Sampling rate | 125 Hz |
-| Subjects (train / val / test) | 28 / 5 / 7 |
-| Window length | 4 seconds (500 samples) |
-| Stride | 250 samples (50% overlap) |
-| PPG filter | 0.5 to 8 Hz, 4th-order Butterworth |
-| ECG filter | 0.5 to 40 Hz, 4th-order Butterworth |
-| SQI threshold | 0.5 |
-| Segments (train / val / test) | 3184 / 452 / 354 |
-
-The subject counts after filtering (28/5/7) are lower than the split assignment (38/7/8) because roughly 25% of subjects were dropped due to corrupted or flat PPG traces that produced no windows above the SQI threshold. This is consistent with the ICU population in BIDMC, where motion artefact and poor perfusion frequently degrade PPG quality.
+| Property | BIDMC | MIT-BIH |
+|---|---|---|
+| Source | PhysioNet BIDMC v1.0.0 | PhysioNet MITDB v1.0.0 |
+| Subjects / records | 53 ICU patients | 47 subjects, 48 records |
+| Native sampling rate | 125 Hz | 360 Hz (resampled to 125 Hz) |
+| Lead used | II | MLII (channel 0) |
+| Bandpass filter | PPG 0.5–8 Hz; ECG 0.5–40 Hz | 0.5–40 Hz |
+| Window length | 4 s (500 samples) | 2 s (250 samples) |
+| Window centring | 50% stride | R-peak centred |
+| Total examples | 3,184 / 452 / 354 (train/val/test) | 109,375 beats (90/10 split) |
+| Used for | PPG→ECG reconstruction | AAMI 5-class beat classifier |
 
 ---
 
@@ -208,6 +206,8 @@ BIDMC is limited to 53 subjects from a single ICU population, and only lead II E
 [20] D. Makowski, T. Pham, Z. J. Lau, J. C. Brammer, F. Legia, H. Velastegui-Hernandez, R. Dominiak, S. Langer, N. Bhatt, B. Lenhart, A. Misiak, and M. Garg, "NeuroKit2: A Python Toolbox for Neurophysiological Signal Processing," *Behav. Res. Methods*, vol. 53, pp. 1689-1696, 2021.
 
 [21] X. Mao, Q. Li, H. Xie, R. Y. K. Lau, Z. Wang, and S. P. Smolley, "Least Squares Generative Adversarial Networks," in *Proc. IEEE Int. Conf. Comput. Vis. (ICCV)*, 2017, pp. 2794-2802.
+
+[22] G. B. Moody and R. G. Mark, "The impact of the MIT-BIH Arrhythmia Database," *IEEE Eng. Med. Biol. Mag.*, vol. 20, no. 3, pp. 45-50, May/June 2001.
 
 ---
 
